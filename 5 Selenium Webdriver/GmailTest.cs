@@ -48,14 +48,16 @@ namespace Selenium_Webdriver
             this.driver.FindElement(By.Name("password")).SendKeys("testuser123!");
             this.driver.FindElement(By.XPath("//*[@id='passwordNext']")).Click();
 
-            //•	Assert, that the login is successful.
+            //•	Assert, that the login is successful: Если появляется кнопка Написать, значит вход выполнен успешно
             IsElementVisible(By.XPath("//div[@role='button' and contains(.,'Написать')]")); //button "Написать"
             StringAssert.Contains(this.driver.FindElement(By.XPath("//div[@role='button' and contains(.,'Написать')]")).GetAttribute("innerHTML"), "Написать", "Login failed.");
 
+            //Count how many emails are in 'Sent' folder at start
             this.driver.FindElement(By.XPath("//*[@title='Отправленные']")).Click();
             IsElementVisible(By.XPath("//*[@role='main']//*[@class='Cp']//tr[1]//*[contains(.,'Кому')]"));
             int countOfSentAtStart = this.driver.FindElements(By.XPath("//*[@role='main']//*[@class='Cp']//tr")).Count;
 
+            //Count how many emails are in 'Drafts' folder at start
             int countOfDraftsAtStart = Int32.Parse(this.driver.FindElement(By.XPath("//*[@data-tooltip='Черновики']//*[@class='bsU']")).GetAttribute("innerHTML"));
 
             //•	Create a new mail(fill addressee, subject and body fields).
@@ -68,7 +70,7 @@ namespace Selenium_Webdriver
             //•	Save the mail as a draft.
             this.driver.FindElement(By.CssSelector("*[alt='Закрыть']")).Click();
 
-            //•	Verify, that the mail presents in ‘Drafts’ folder.
+            //•	Verify, that the mail presents in ‘Drafts’ folder: Если количество мейлов в папке Drafts стало на 1 больше, значит письмо сохранилось в папке Drafts
             this.driver.SwitchTo().DefaultContent();
             int countOfDraftsAfterMailCreation = Int32.Parse(this.driver.FindElement(By.XPath("//*[@data-tooltip='Черновики']//*[@class='bsU']")).GetAttribute("innerHTML"));
             Assert.AreEqual(countOfDraftsAtStart + 1, countOfDraftsAfterMailCreation, "Draft wasn't saved");
@@ -86,12 +88,12 @@ namespace Selenium_Webdriver
             //•	Send the mail.
             this.driver.FindElement(By.XPath("//div[@role='button' and contains(.,'Отправить')]")).Click();
 
-            //•	Verify, that the mail disappeared from ‘Drafts’ folder.
+            //•	Verify, that the mail disappeared from ‘Drafts’ folder: Если количество мейлов в папке Drafts стало таким же как и в начале, значит письмо исчезло из папки Drafts
             this.driver.SwitchTo().DefaultContent();
             int countOfDraftsAtEnd = Int32.Parse(this.driver.FindElement(By.XPath("//*[@data-tooltip='Черновики']//*[@class='bsU']")).GetAttribute("innerHTML"));
             Assert.AreEqual(countOfDraftsAtStart, countOfDraftsAtEnd, "Mail didn't disappear from 'Drafts' folder");
 
-            //•	Verify, that the mail is in ‘Sent’ folder.
+            //•	Verify, that the mail is in ‘Sent’ folder: Если количество мейлов в папке Sent стало на 1 больше, значит письмо было отправлено
             this.driver.FindElement(By.XPath("//*[@title='Отправленные']")).Click();
             IsElementVisible(By.XPath("//*[@role='main']//*[@class='Cp']//tr[1]//*[contains(.,'Кому')]"));
             int countOfSentAtEnd = this.driver.FindElements(By.XPath("//*[@role='main']//*[@class='Cp']//tr")).Count;
